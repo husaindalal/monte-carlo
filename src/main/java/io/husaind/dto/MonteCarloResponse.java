@@ -5,19 +5,19 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
 
 @Data
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MonteCarloResponse implements Serializable {
 
-    private BigDecimal aggressive90Percentile;
-    private BigDecimal aggressive10Percentile;
-    private BigDecimal aggressiveMedian;
+    //TODO should be ideally BigDecimal
+    private Double aggressive90Percentile;
+    private Double aggressive10Percentile;
+    private Double aggressiveMedian;
 
-    private BigDecimal conservative90Percentile;
-    private BigDecimal conservative10Percentile;
-    private BigDecimal conservativeMedian;
+    private Double conservative90Percentile;
+    private Double conservative10Percentile;
+    private Double conservativeMedian;
 
 }
