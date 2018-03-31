@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -35,17 +35,52 @@ public class MonteCarloService {
 
         //TODO validate request
         //TODO make sure percentages are divided by 100
+        request = validateAndCorrectRequest(request);
 
         //NOTE I have hardcoded aggressive and conservative types. Instead a list of Risk and Return can be accepted and returned
         NormalDistribution aggressiveDistribution = new NormalDistribution(request.getAggressiveReturn(), request.getAggressiveRisk()); //Can pass random, here. Not sure the use
         List<Double> aggressiveValues = simulateTimes(request, aggressiveDistribution);
 
+        //Implementation of the normal (gaussian) distribution.
         NormalDistribution conservativeDistribution = new NormalDistribution(request.getConservativeReturn(), request.getConservativeRisk()); //Can pass random, here. Not sure the use
         List<Double> conservativeValues = simulateTimes(request, conservativeDistribution);
 
         MonteCarloResponse response = calcResponse(aggressiveValues, conservativeValues);
 
-        return MonteCarloResponse.builder().build();
+        return response;
+
+    }
+
+    private MonteCarloRequest validateAndCorrectRequest(MonteCarloRequest request) {
+        request.setAggressiveReturn(request.getAggressiveReturn() / 100);
+        request.setAggressiveRisk(request.getAggressiveRisk() / 100);
+        request.setConservativeReturn(request.getConservativeReturn() / 100);
+        request.setConservativeRisk(request.getConservativeRisk() / 100);
+        request.setInflationRate(request.getInflationRate() / 100);
+
+        return request;
+    }
+
+
+    private List<Double> simulateTimes(MonteCarloRequest request, NormalDistribution distribution) {
+        List<Double> simulatedValues = new ArrayList<>(request.getSimulationCount().intValue());
+        for (int i = 0; i < request.getSimulationCount(); i++) {
+            simulatedValues.add(yearlyReturn(request, distribution));
+        }
+
+        return simulatedValues;
+    }
+
+    private Double yearlyReturn(MonteCarloRequest request, NormalDistribution distribution) {
+
+        Double balance = request.getInvestedAmountInitial();
+
+        for (int i = 0; i < request.getInvestedYears(); i++) {
+            balance = balance * (1 + distribution.inverseCumulativeProbability(random.nextDouble()));
+            balance = balance - request.getInflationRate() * balance; //Adjust for inflation
+        }
+
+        return balance;
 
     }
 
@@ -54,10 +89,12 @@ public class MonteCarloService {
 
         double[] aggressiveArray = aggressiveValues.stream()
                 .mapToDouble(Double::doubleValue)
+                .sorted()
                 .toArray();
 
         double[] conservativeArray = conservativeValues.stream()
                 .mapToDouble(Double::doubleValue)
+                .sorted()
                 .toArray();
 
         Percentile percentile90 = new Percentile(90);
@@ -74,42 +111,28 @@ public class MonteCarloService {
                 .build();
     }
 
-    private Double getMedian(List<Double> simulatedValues) {
-        Collections.sort(simulatedValues);
-        int middle = simulatedValues.size() / 2;
-        Double medianValue; //declare variable
-        if (simulatedValues.size() % 2 == 1) {
-            medianValue = simulatedValues.get(middle);
-        } else {
-            medianValue = (simulatedValues.get(middle - 1) + simulatedValues.get(middle)) / 2;
+
+    /**
+     * Unused
+     *
+     * @param list
+     * @return
+     */
+    private Double getMedian(List<Double> list) {
+
+        list.sort(Comparator.comparing(Double::doubleValue));
+        int midList = list.size() / 2;
+
+        Double median = list.get(midList);
+        if (list.size() % 2 == 0) {
+            median = (median + list.get(midList - 1)) / 2;
         }
 
-        return medianValue;
+        Double percentile90 = list.get(list.size() * 9 / 10);
+        Double percentile10 = list.get(list.size() / 10);
+
+        return median;
     }
 
 
-    public Double yearlyReturn(MonteCarloRequest request, NormalDistribution distribution) {
-
-        Double balance = request.getInvestedAmountInitial() * (1 + distribution.inverseCumulativeProbability(random.nextDouble())) + request.getInvestedAmountYearly();
-
-        for (int i = 0; i < request.getInvestedYears(); i++) {
-            balance = balance * (1 + distribution.inverseCumulativeProbability(random.nextDouble()));
-            balance = balance - request.getInflationRate() * balance;
-            balance = balance + request.getInvestedAmountYearly(); //Assuming invested end of the year
-        }
-
-        //TODO handle inflation
-
-        return balance;
-
-    }
-
-    public List<Double> simulateTimes(MonteCarloRequest request, NormalDistribution distribution) {
-        List<Double> simulatedValues = new ArrayList<>(request.getSimulationCount().intValue());
-        for (int i = 0; i < request.getSimulationCount(); i++) {
-            simulatedValues.add(yearlyReturn(request, distribution));
-        }
-
-        return simulatedValues;
-    }
 }

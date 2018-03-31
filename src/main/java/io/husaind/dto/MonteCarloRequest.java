@@ -21,7 +21,7 @@ public class MonteCarloRequest implements Serializable {
 
     private Double investedAmountInitial;// = new BigDecimal("10000"); //10000
 
-    private Double investedAmountYearly;// = new BigDecimal("0"); //10000
+    //private Double investedAmountYearly;// = new BigDecimal("0"); //10000
 
     private Double investedYears;// = new BigDecimal("20");
 

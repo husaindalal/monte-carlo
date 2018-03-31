@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping(value = "/persons")
+@RequestMapping(value = "/monte-carlo")
 
 public class MonteCarloController {
 
