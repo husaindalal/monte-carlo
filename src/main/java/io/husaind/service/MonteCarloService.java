@@ -16,7 +16,7 @@ import java.util.List;
 @Service
 public class MonteCarloService {
 
-    RandomGenerator random;
+    private RandomGenerator random;
 
 
     @Autowired
@@ -78,6 +78,7 @@ public class MonteCarloService {
         for (int i = 0; i < request.getInvestedYears(); i++) {
             balance = balance * (1 + distribution.inverseCumulativeProbability(random.nextDouble()));
             balance = balance - request.getInflationRate() * balance; //Adjust for inflation
+            //inflationFormula2: balance = balance * (100 / (100 + request.getInflationRate() ));
         }
 
         return balance;
@@ -113,7 +114,7 @@ public class MonteCarloService {
 
 
     /**
-     * Unused
+     * Unused. It can be a replacement of calcResponse
      *
      * @param list
      * @return

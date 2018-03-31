@@ -17,10 +17,10 @@ class ApplicationTests extends Specification {
     def "simulate results"() {
         when: "create params and simulate"
         MonteCarloRequest request = new MonteCarloRequest()
-        request.aggressiveReturn = 9.4324d
-        request.aggressiveRisk = 15.675d
-        request.conservativeReturn = 7.2d //6.189d
-        request.conservativeRisk = 7.4d //6.3438d
+        request.aggressiveReturn = 9.4324d //8.8d //
+        request.aggressiveRisk = 15.675d //13.5d //
+        request.conservativeReturn = 6.189d //7.2d //
+        request.conservativeRisk = 6.3438d //7.4d //
         request.investedAmountInitial = 100000d
         request.investedYears = 20d
         request.inflationRate = 3.5d
@@ -30,8 +30,8 @@ class ApplicationTests extends Specification {
         MonteCarloResponse response = monteCarloService.simulate(request)
         then: "check response"
         println response
-        response.aggressiveMedian != 0
-        response.conservativeMedian != 0
+        response.aggressiveMedian > 100000
+        response.conservativeMedian > 100000
 
     }
 
