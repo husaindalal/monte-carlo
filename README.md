@@ -1,13 +1,18 @@
 # monte-carlo
 Monte carlo simulation
 
-```
-./gradle bootRun
-```
+
+#Note
+I have converted the excel formula to Java code: https://www.youtube.com/watch?v=Q5Fw2IRMjPQ
 
 
 #Start URL
+```
+gradle bootRun
+```
+
 http://localhost:8080/swagger-ui.html#/monte-carlo-controller/simulateUsingPOST
+
 ```
 {
   "inflationRate": 3.5,
@@ -29,5 +34,7 @@ http://localhost:8080/swagger-ui.html#/monte-carlo-controller/simulateUsingPOST
 
 #Run tests
 ```
-./gradle test
+gradle test
 ```
+
+

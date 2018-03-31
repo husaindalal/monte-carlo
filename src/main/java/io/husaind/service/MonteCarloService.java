@@ -51,6 +51,13 @@ public class MonteCarloService {
 
     }
 
+    /**
+     * Expected percent values so need to divide by 100
+     * TODO more validations can be added like negatives, nulls etc
+     *
+     * @param request
+     * @return
+     */
     private MonteCarloRequest validateAndCorrectRequest(MonteCarloRequest request) {
         BigDecimal bigDecimal100 = BigDecimal.valueOf(100);
 
