@@ -6,6 +6,10 @@ Monte carlo simulation
 I have converted the excel formula to Java code: https://www.youtube.com/watch?v=Q5Fw2IRMjPQ
 
 
+#Technologies used:
+Spring boot 2.0, Gradle, Spock testing, Swagger docs, Spring mvc web
+ 
+
 #Start URL
 ```
 gradle bootRun
