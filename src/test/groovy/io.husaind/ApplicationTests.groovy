@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import spock.lang.Specification
 
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
+
 @SpringBootTest(classes = Application.class)
 
 class ApplicationTests extends Specification {
@@ -17,6 +20,8 @@ class ApplicationTests extends Specification {
 
     def "simulate results"() {
         when: "create params and simulate"
+
+        LocalDateTime start = LocalDateTime.now()
 
         RiskReturn aggressive = new RiskReturn(averageReturn: 9.4324d, risk: 15.675d)
         RiskReturn conservative = new RiskReturn(averageReturn: 6.189d, risk: 6.3438d)
@@ -30,9 +35,11 @@ class ApplicationTests extends Specification {
 
         MonteCarloResponse response = monteCarloService.simulate(request)
 
+        LocalDateTime stop = LocalDateTime.now()
 
         then: "check response"
         println response
+        println "time taken " + ChronoUnit.MILLIS.between(start, stop)
 
         response.percentiles.size() == 2
 

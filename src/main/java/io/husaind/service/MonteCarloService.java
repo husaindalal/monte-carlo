@@ -15,6 +15,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class MonteCarloService {
@@ -36,18 +37,15 @@ public class MonteCarloService {
      */
     public MonteCarloResponse simulate(MonteCarloRequest request) {
 
-        request = validateAndCorrectRequest(request);
+        final MonteCarloRequest requestData = validateAndCorrectRequest(request);
 
-        MonteCarloResponse response = new MonteCarloResponse();
-        response.setPercentiles(new ArrayList<>());
+        List<Percentiles> percentiles = request.getRiskReturns().parallelStream()
+                .map(riskReturn -> new NormalDistribution(riskReturn.getAverageReturn().doubleValue(), riskReturn.getRisk().doubleValue()))
+                .map(distribution -> projectValues(requestData, distribution))
+                .map(this::calcPercentiles)
+                .collect(Collectors.toList());
 
-        for (RiskReturn riskReturn : request.getRiskReturns()) {
-            NormalDistribution distribution = new NormalDistribution(riskReturn.getAverageReturn().doubleValue(), riskReturn.getRisk().doubleValue()); //Can pass random, here. Not sure the use
-            List<BigDecimal> projectedValues = projectValues(request, distribution);
-            response.getPercentiles().add(calcPercentiles(projectedValues));
-        }
-
-        return response;
+        return new MonteCarloResponse(percentiles);
 
     }
 
