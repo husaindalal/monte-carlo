@@ -85,17 +85,14 @@ public class MonteCarloService {
         return simulatedValues;
     }
 
-    /**
-     * Not sure if the inflation formula is correct. Formula used: balance -= balance * inflationRate
-     */
     private BigDecimal yearlyReturn(MonteCarloRequest request, NormalDistribution distribution) {
 
         BigDecimal balance = request.getInvestedAmountInitial();
 
         for (int i = 0; i < request.getInvestedYears(); i++) {
             balance = balance.multiply(BigDecimal.valueOf(1 + distribution.inverseCumulativeProbability(random.nextDouble())));
-            balance = balance.subtract(balance.multiply(request.getInflationRate())); //Adjust for inflation
-            //inflationFormula2: balance = balance * (100 / (100 + request.getInflationRate() ));
+            // The inflation formula was incorrect, so I've corrected it
+            balance = balance.divide(BigDecimal.ONE.add(request.getInflationRate()), 10, RoundingMode.HALF_EVEN);
         }
 
         return balance;
